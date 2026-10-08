@@ -39,6 +39,31 @@ module "eks" {
 
   enable_cluster_creator_admin_permissions = true
 
+    access_entries = {
+    cli-user = {
+      principal_arn = "arn:aws:iam::777285773915:user/cli-user"
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+    github-actions = {
+      principal_arn = "arn:aws:iam::777285773915:role/eks-project-github-actions-role"
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   # Use the cluster IAM role created above
   create_iam_role = false
   iam_role_arn    = aws_iam_role.cluster.arn
@@ -60,29 +85,13 @@ module "eks" {
 
   # Enable essential add-ons
   cluster_addons = {
-    coredns    = {}
-    kube-proxy = {}
-    vpc-cni    = {}
+    coredns            = {}
+    kube-proxy         = {}
+    vpc-cni            = {}
     aws-ebs-csi-driver = {}
   }
 
   tags = {
     Name = "${var.name}-cluster"
-  }
-}
-
-resource "aws_eks_access_entry" "cli_user" {
-  cluster_name  = module.eks.cluster_name
-  principal_arn = "arn:aws:iam::777285773915:user/cli-user"
-  type          = "STANDARD"
-}
-
-resource "aws_eks_access_policy_association" "cli_user_admin" {
-  cluster_name  = module.eks.cluster_name
-  principal_arn = "arn:aws:iam::777285773915:user/cli-user"
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-
-  access_scope {
-    type = "cluster"
   }
 }
