@@ -63,9 +63,26 @@ module "eks" {
     coredns    = {}
     kube-proxy = {}
     vpc-cni    = {}
+    aws-ebs-csi-driver = {}
   }
 
   tags = {
     Name = "${var.name}-cluster"
+  }
+}
+
+resource "aws_eks_access_entry" "cli_user" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::777285773915:user/cli-user"
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "cli_user_admin" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::777285773915:user/cli-user"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
   }
 }

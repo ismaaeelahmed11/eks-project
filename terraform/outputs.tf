@@ -21,3 +21,7 @@ output "eks_cluster_endpoint" {
 output "github_actions_role_arn" {
   value = module.oidc.github_actions_role_arn
 }
+
+output "ebs_csi_role_arn" {
+  value = module.irsa.ebs_csi_role_arn
+}
