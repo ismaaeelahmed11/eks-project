@@ -72,13 +72,17 @@ jobs:
         run: |
           aws eks update-kubeconfig \
             --name ${{ env.EKS_CLUSTER_NAME }} \
-            --region ${{ env.AWS_REGION }}
+            --region ${{ env.AWS_REGION }} \
+            --kubeconfig $HOME/.kube/config
+          kubectl config current-context
+          kubectl get nodes
 
       - name: Deploy to EKS
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          export KUBECONFIG=$HOME/.kube/config
           kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/cluster-issuer.yaml
           sed -i "s|image:.*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" k8s/deployment.yaml
