@@ -8,6 +8,10 @@ A production-grade Kubernetes cluster on Amazon EKS, running IT-Tools over HTTPS
 
 ## Architecture
 
+![Architecture](screenshots/31-architecture-drawio.png)
+
+### Mermaid Version
+
 ```mermaid
 graph TB
     User([User Browser])
@@ -60,9 +64,6 @@ graph TB
     OIDC -.->|auth| Actions
     Repo --> ArgoCD
 ```
-### draw.io Diagram
-
-![Architecture - draw.io](screenshots/31-architecture-drawio.png)
 
 ---
 
