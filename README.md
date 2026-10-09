@@ -60,6 +60,9 @@ graph TB
     OIDC -.->|auth| Actions
     Repo --> ArgoCD
 ```
+### draw.io Diagram
+
+![Architecture - draw.io](screenshots/31-architecture-drawio.png)
 
 ---
 
