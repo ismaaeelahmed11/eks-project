@@ -62,6 +62,7 @@ graph TB
 ```
 
 ---
+
 ## Project Board
 
 Tracked progress via [GitHub Projects](https://github.com/users/ismaaeelahmed11/projects/1):
@@ -91,7 +92,7 @@ Tracked progress via [GitHub Projects](https://github.com/users/ismaaeelahmed11/
 
 ### What is this app?
 
-**IT-Tools** is an open-source collection of handy utilities for developers — JSON formatters, hash generators, regex testers, subnets calculators, and 80+ other tools. It's a real production container used by thousands of developers.
+**IT-Tools** is an open-source collection of handy utilities for developers — JSON formatters, hash generators, regex testers, subnet calculators, and 80+ other tools. It's a real production container used by thousands of developers.
 
 I chose it because the EKS project focuses on **infrastructure and orchestration**, not app development. Deploying a real, useful container demonstrates platform engineering skills better than a custom "Hello World".
 
@@ -105,7 +106,7 @@ I chose it because the EKS project focuses on **infrastructure and orchestration
 
 ### Why EKS? Why not ECS or a simpler option?
 
-**Why not ECS:** You did ECS as the previous project. EKS is the natural next step — managed Kubernetes is the industry standard for container orchestration at scale.
+**Why not ECS:** I already built a production-grade ECS project earlier in the bootcamp — it taught me container orchestration at the service level. EKS is the natural next step: managed Kubernetes is the industry standard for orchestration at scale, and it teaches portable skills.
 
 **Why not Vercel/Netlify:** They don't teach Kubernetes. This project is about learning production Kubernetes: Ingress, CertManager, ExternalDNS, ArgoCD, Prometheus, IRSA, and more.
 
@@ -283,14 +284,14 @@ All pipelines use **OIDC** — no static AWS keys.
 
 ## Troubleshooting Journey
 
-**Issue 1: Port 80 vs 8080**
-Same as ECS — non-root containers can't bind to privileged ports. Fixed by using 8080.
+**Issue 1: Container port conflicts**
+Non-root containers can't bind to privileged ports. Fixed by using 8080 for the container and 443 at the load balancer.
 
 **Issue 2: OIDC trust policy**
 GitHub's immutable subject claims broke the trust policy. Fixed by adding both old and new formats to `sub` conditions.
 
 **Issue 3: Pods stuck Pending**
-Node capacity limit on t3.small (~11 pods). Fixed by scaling to 4 nodes.
+Node capacity limit on t3.small (~11 pods per node). Fixed by scaling to 4 nodes.
 
 **Issue 4: PVCs stuck Pending**
 EBS CSI driver wasn't installed. Then it crashed without an IAM role. Fixed by adding IRSA + the driver as an EKS add-on.
@@ -298,14 +299,12 @@ EBS CSI driver wasn't installed. Then it crashed without an IAM role. Fixed by a
 **Issue 5: EKS access entries conflict**
 Module's `cluster_creator` auto-admin clashed with explicit access entries. Fixed by disabling auto-admin and managing entries explicitly.
 
-**Issue 6: VPCs stuck in Delete**
-The VPC module's internet gateway deletion timed out. Manually cleaned up.
-
 ---
 
 ## Cost Management
 
 EKS is expensive to run continuously:
+
 - Control plane: ~$2.40/day
 - 4× t3.small nodes: ~$2.40/day
 - NAT Gateway: ~$1.08/day
@@ -319,7 +318,6 @@ Destroyed after submission. Screenshots and code preserved in this repo.
 ## Screenshots
 
 ### Infrastructure Setup
-
 ![Repo structure](screenshots/01-repo-structure.png)
 ![S3 state bucket](screenshots/02-tfstate-bucket.png)
 ![Terraform init](screenshots/04-terraform-init.png)
@@ -329,7 +327,6 @@ Destroyed after submission. Screenshots and code preserved in this repo.
 ![Terraform apply EKS](screenshots/09-terraform-apply-eks.png)
 
 ### Cluster Running
-
 ![EKS nodes running](screenshots/10-eks-nodes-running.png)
 ![NGINX Ingress installed](screenshots/11-nginx-ingress-installed.png)
 ![CertManager installed](screenshots/12-certmanager-installed.png)
@@ -337,31 +334,26 @@ Destroyed after submission. Screenshots and code preserved in this repo.
 ![ExternalDNS installed](screenshots/14-externaldns-installed.png)
 
 ### Application Deployment
-
 ![IT-Tools pushed to ECR](screenshots/15-it-tools-pushed-to-ecr.png)
 ![IT-Tools deployed](screenshots/16-it-tools-deployed.png)
 ![IT-Tools live HTTPS](screenshots/17-it-tools-live-https.png)
 
 ### CI/CD Pipelines
-
 ![Terraform Apply pipeline green](screenshots/20-terraform-pipeline-green.png)
 ![OIDC trust policy](screenshots/20a-oidc-trust-policy.png)
 ![App Deploy pipeline green](screenshots/21-app-deploy-pipeline-green.png)
 
 ### GitOps with ArgoCD
-
 ![ArgoCD installed](screenshots/23-argocd-installed.png)
 ![ArgoCD synced](screenshots/24-argocd-synced.png)
 ![ArgoCD UI tree](screenshots/29-argocd-ui.png)
 
 ### Monitoring
-
 ![Monitoring pending (debug)](screenshots/25-monitoring-debug-pending-pods.png)
 ![Monitoring running](screenshots/26-monitoring-running.png)
 ![Grafana dashboard](screenshots/27-grafana-dashboard.png)
 
 ### Project Management
-
 ![GitHub Project board](screenshots/30-github-project-board.png)
 
 ---
