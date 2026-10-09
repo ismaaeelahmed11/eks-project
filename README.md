@@ -317,43 +317,129 @@ Destroyed after submission. Screenshots and code preserved in this repo.
 
 ## Screenshots
 
-### Infrastructure Setup
+### 1. Project Structure
+Initial repo layout — Terraform modules, Helm folders, K8s manifests, CI/CD workflow folders, and docs.
+
 ![Repo structure](screenshots/01-repo-structure.png)
+
+### 2. S3 Remote State
+Terraform state bucket with versioning, encryption, and public access blocked. This is where the state file lives — shared between my laptop and GitHub Actions.
+
 ![S3 state bucket](screenshots/02-tfstate-bucket.png)
+
+### 3. Terraform Initialised
+Backend connected to S3, AWS provider downloaded, VPC module loaded. Everything ready for the first plan.
+
 ![Terraform init](screenshots/04-terraform-init.png)
+
+### 4. Terraform Plan — VPC
+14 resources to create: VPC, 2 public subnets, 2 private subnets, Internet Gateway, NAT Gateway, Elastic IP, 2 route tables, 4 route table associations.
+
 ![Terraform plan VPC](screenshots/05-terraform-plan-vpc.png)
+
+### 5. Terraform Apply — VPC
+All 14 resources created. VPC ID and subnet IDs printed as outputs — these feed into the EKS module.
+
 ![Terraform apply VPC](screenshots/06-terraform-apply-vpc.png)
+
+### 6. Terraform Plan — EKS
+33 resources to add. This includes the EKS control plane, managed node group, IAM roles, security groups, KMS key, OIDC provider, and essential add-ons (CoreDNS, kube-proxy, VPC CNI).
+
 ![Terraform plan EKS](screenshots/08-terraform-plan-eks.png)
+
+### 7. Terraform Apply — EKS
+EKS cluster and node group created. Cluster endpoint and name printed as outputs. The apply takes ~15 minutes because AWS provisions the control plane in the background.
+
 ![Terraform apply EKS](screenshots/09-terraform-apply-eks.png)
 
-### Cluster Running
+### 8. EKS Nodes Running
+`kubectl get nodes` showing 4 worker nodes in Ready state, running Kubernetes v1.31.14. These nodes are spread across availability zones for resilience.
+
 ![EKS nodes running](screenshots/10-eks-nodes-running.png)
+
+### 9. NGINX Ingress Installed
+NGINX Ingress Controller deployed via Helm. AWS automatically provisioned a Network Load Balancer (visible in the EXTERNAL-IP column). This is the entry point for external traffic.
+
 ![NGINX Ingress installed](screenshots/11-nginx-ingress-installed.png)
+
+### 10. CertManager Installed
+All three CertManager pods running: the main controller, the CA injector, and the webhook. CertManager watches Ingress resources and requests SSL certificates from Let's Encrypt automatically.
+
 ![CertManager installed](screenshots/12-certmanager-installed.png)
+
+### 11. ClusterIssuer Ready
+The Let's Encrypt ClusterIssuer is Ready. This tells CertManager how to authenticate with Let's Encrypt using HTTP-01 challenges — NGINX Ingress serves the challenge file on port 80.
+
 ![ClusterIssuer ready](screenshots/13-clusterissuer-ready.png)
+
+### 12. ExternalDNS Installed
+ExternalDNS pod running. It watches Kubernetes Ingress resources and automatically creates DNS records in Cloudflare — no more manual DNS updates.
+
 ![ExternalDNS installed](screenshots/14-externaldns-installed.png)
 
-### Application Deployment
+### 13. IT-Tools Pushed to ECR
+Pulled the official IT-Tools image from Docker Hub, retagged it for ECR, and pushed it. Now EKS can pull it from our private registry instead of Docker Hub.
+
 ![IT-Tools pushed to ECR](screenshots/15-it-tools-pushed-to-ecr.png)
+
+### 14. IT-Tools Deployed
+All resources created: 2 IT-Tools pods Running, ClusterIP service, and Ingress with the host `eks.ismaaeelahmed.co.uk`. CertManager is already spinning up a pod to validate domain ownership.
+
 ![IT-Tools deployed](screenshots/16-it-tools-deployed.png)
+
+### 15. HTTPS Live
+IT-Tools running at `https://eks.ismaaeelahmed.co.uk` with a valid Let's Encrypt certificate. The padlock shows the SSL certificate was issued and trusted automatically.
+
 ![IT-Tools live HTTPS](screenshots/17-it-tools-live-https.png)
 
-### CI/CD Pipelines
+### 16. Terraform Apply Pipeline Green
+The Terraform Apply GitHub Actions pipeline succeeded. It uses OIDC to assume an AWS role — no static keys — and runs `terraform plan` followed by `terraform apply` on every push to `terraform/**`.
+
 ![Terraform Apply pipeline green](screenshots/20-terraform-pipeline-green.png)
+
+### 17. OIDC Trust Policy
+The GitHub Actions IAM role's trust policy. It accepts both the classic subject claim (`repo:owner/name:*`) and the newer immutable format with numeric IDs — needed because GitHub changed how they issue OIDC tokens.
+
 ![OIDC trust policy](screenshots/20a-oidc-trust-policy.png)
+
+### 18. App Deploy Pipeline Green
+The App Build, Scan & Deploy pipeline. Two jobs: **Checkov** (scans Terraform for security issues) and **build-and-deploy** (Trivy scans the image, pushes to ECR, deploys to EKS via kubectl). Both green.
+
 ![App Deploy pipeline green](screenshots/21-app-deploy-pipeline-green.png)
 
-### GitOps with ArgoCD
+### 19. ArgoCD Installed
+All ArgoCD pods running in the `argocd` namespace: application controller, appset controller, dex server, notifications controller, Redis, repo server, and the main API server.
+
 ![ArgoCD installed](screenshots/23-argocd-installed.png)
+
+### 20. ArgoCD Synced
+The `it-tools` Application is Synced and Healthy. ArgoCD watches the `k8s/` folder in the repo and reconciles cluster state automatically. Any change pushed to Git gets applied within 3 minutes.
+
 ![ArgoCD synced](screenshots/24-argocd-synced.png)
+
+### 21. ArgoCD UI — GitOps Tree
+The ArgoCD visual tree: namespace → service → deployment → replicaset → 2 running pods. Also shows the Ingress, ClusterIssuer, and the issued TLS certificate. This is what GitOps looks like in action.
+
 ![ArgoCD UI tree](screenshots/29-argocd-ui.png)
 
-### Monitoring
+### 22. Monitoring Debug — Pending Pods
+Initial monitoring install failed. Alertmanager, Grafana, and Prometheus pods stuck Pending. Root cause: EBS CSI driver wasn't installed, so PVCs couldn't bind.
+
 ![Monitoring pending (debug)](screenshots/25-monitoring-debug-pending-pods.png)
+
+### 23. Monitoring Running
+After installing the EBS CSI driver, adding IRSA for it, and scaling nodes to 4× t3.small, all monitoring pods are Running. Prometheus, Grafana, Alertmanager, and node exporters.
+
 ![Monitoring running](screenshots/26-monitoring-running.png)
+
+### 24. Grafana Dashboard
+Grafana showing live Kubernetes cluster metrics: CPU utilisation (3.54%), memory utilisation (52.1%), per-namespace breakdown (monitoring, argocd, cert-manager, kube-system, it-tools), and live resource charts.
+
 ![Grafana dashboard](screenshots/27-grafana-dashboard.png)
 
-### Project Management
+### 25. Project Board
+GitHub Projects board tracking all tasks. Todo, In Progress, and Done columns show the full project breakdown — from VPC setup to Prometheus installation to README.
+
 ![GitHub Project board](screenshots/30-github-project-board.png)
 
 ---
