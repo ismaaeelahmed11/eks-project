@@ -30,7 +30,6 @@ alertmanager:
 
 grafana:
   enabled: true
-  adminPassword: "admin123"
   persistence:
     enabled: true
     storageClassName: gp2
