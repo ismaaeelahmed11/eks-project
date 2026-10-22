@@ -4,66 +4,21 @@ A production-grade Kubernetes cluster on Amazon EKS, running IT-Tools over HTTPS
 
 **Live URL:** https://eks.ismaaeelahmed.co.uk *(demo — infrastructure destroyed after submission to avoid AWS charges)*
 
+
+---
+## 🎬 Project Walkthrough
+
+Watch my 2.5-minute technical walkthrough covering the AWS EKS architecture, Terraform infrastructure, Kubernetes application deployment, Argo CD GitOps, monitoring, CI/CD and troubleshooting.
+
+[![Watch the AWS EKS Project Walkthrough](https://img.youtube.com/vi/RDmnaTi2auE/hqdefault.jpg)](https://youtu.be/RDmnaTi2auE)
+
+**[▶ Watch the AWS EKS Project Walkthrough on YouTube](https://youtu.be/RDmnaTi2auE)**
+
 ---
 
 ## Architecture
 
 ![Architecture](screenshots/31-architecture-drawio.png)
-
-### Mermaid Version
-
-```mermaid
-graph TB
-    User([User Browser])
-    
-    User -->|HTTPS| CF[Cloudflare DNS<br/>eks.ismaaeelahmed.co.uk]
-    CF -->|CNAME| NLB[AWS Network<br/>Load Balancer]
-    
-    subgraph AWS["AWS Cloud - eu-west-2"]
-        subgraph VPC["VPC 10.0.0.0/16"]
-            subgraph PublicSubnets["Public Subnets"]
-                NLB
-            end
-            subgraph PrivateSubnets["Private Subnets"]
-                subgraph EKS["EKS Cluster - k8s 1.31"]
-                    Ingress[NGINX Ingress<br/>Controller]
-                    ITTools[IT-Tools Pods<br/>2 replicas]
-                    CertMgr[CertManager]
-                    ExtDNS[ExternalDNS]
-                    ArgoCD[ArgoCD]
-                    Prom[Prometheus]
-                    Graf[Grafana]
-                end
-                Nodes[Worker Nodes<br/>4x t3.small]
-            end
-            ECR[(ECR Repository<br/>it-tools)]
-            KMS[KMS Key<br/>Secrets encryption]
-        end
-    end
-    
-    subgraph GitHub["GitHub"]
-        Repo[eks-project repo]
-        Actions[GitHub Actions]
-        OIDC[OIDC Provider]
-    end
-    
-    NLB --> Ingress
-    Ingress --> ITTools
-    CertMgr -.->|SSL certs| Ingress
-    ExtDNS -.->|DNS records| CF
-    ArgoCD -.->|GitOps sync| ITTools
-    Prom --> Graf
-    Prom -.->|scrapes| Ingress
-    Prom -.->|scrapes| ITTools
-    ECR -.->|pulls image| ITTools
-    KMS -.->|encrypts| EKS
-    
-    Actions -->|build + push| ECR
-    Actions -->|terraform apply| AWS
-    Actions -->|kubectl deploy| EKS
-    OIDC -.->|auth| Actions
-    Repo --> ArgoCD
-```
 
 ---
 
