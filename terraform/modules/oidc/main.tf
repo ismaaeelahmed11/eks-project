@@ -22,8 +22,8 @@ resource "aws_iam_role" "github_actions" {
           }
           StringLike = {
             "token.actions.githubusercontent.com:sub" = [
-              "repo:${var.github_repo}:*",
-              "repo:ismaaeelahmed11@*/eks-project@*:*"
+              "repo:${var.github_repo}:ref:refs/heads/main",
+              "repo:ismaaeelahmed11@*/eks-project@*:ref:refs/heads/main"
             ]
           }
         }
@@ -36,7 +36,6 @@ resource "aws_iam_role" "github_actions" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "github_actions_admin" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}
+# AdministratorAccess has been removed.
+# Before using this role for deployments, attach scoped IAM
+# policies for the AWS resources managed by Terraform.
