@@ -1,9 +1,8 @@
-
-# AWS EKS — End-to-End Kubernetes Platform, GitOps & Monitoring
+# AWS EKS — End-to-End Production-Grade Kubernetes, GitOps & Monitoring
 
 **AWS · Terraform · Kubernetes · Helm · Argo CD · GitHub Actions · Prometheus · Grafana**
 
-Built an end-to-end, production-style Kubernetes platform on **Amazon EKS**, deploying the IT-Tools application over HTTPS with infrastructure as code, automated CI/CD, GitOps, monitoring and security scanning.
+Built and deployed an end-to-end Kubernetes platform on **Amazon EKS**, applying **production-grade engineering practices** across infrastructure as code, automated CI/CD, GitOps, HTTPS, monitoring and security scanning.
 
 The project covers the full deployment process: provisioning AWS infrastructure with Terraform, configuring networking and Kubernetes add-ons, deploying a containerised application, automating delivery and troubleshooting operational issues.
 
@@ -56,6 +55,38 @@ The EKS managed control plane runs in AWS, while the application workloads and s
 
 ---
 
+## Deployment Evidence — At a Glance
+
+These four screenshots show the main deployment outcomes without requiring you to expand the detailed evidence gallery below.
+
+### EKS worker nodes Ready
+
+Four EKS worker nodes running across two Availability Zones.
+
+![Four EKS worker nodes in Ready state](screenshots/10-eks-nodes-running.png)
+
+### CI/CD pipeline successful
+
+GitHub Actions Terraform Apply pipeline completed successfully using AWS OIDC authentication.
+
+![GitHub Actions Terraform Apply pipeline successful](screenshots/20-terraform-pipeline-green.png)
+
+### Argo CD Synced and Healthy
+
+The IT-Tools application reconciled successfully through Argo CD GitOps.
+
+![Argo CD application Synced and Healthy](screenshots/24-argocd-synced.png)
+
+### Grafana monitoring dashboard
+
+Grafana showing Kubernetes CPU, memory and namespace-level metrics captured from the running cluster.
+
+![Grafana Kubernetes monitoring dashboard](screenshots/27-grafana-dashboard.png)
+
+For the complete infrastructure, application, security and troubleshooting evidence, see [Implementation Evidence](#implementation-evidence).
+
+---
+
 ## Infrastructure Overview
 
 | Component | Implementation |
@@ -78,7 +109,7 @@ The EKS managed control plane runs in AWS, while the application workloads and s
 | **Security Scanning** | Checkov and Trivy |
 | **Persistent Storage** | Amazon EBS CSI Driver |
 
-The architecture uses production-oriented engineering practices, but this was a time-limited portfolio deployment rather than a commercially operated production service.
+The platform applies **production-grade engineering practices** such as modular infrastructure as code, multi-AZ worker nodes, GitOps, monitoring and automated security checks. It was a time-limited portfolio deployment rather than a commercially operated or fully production-validated service.
 
 ---
 
@@ -672,7 +703,7 @@ This kept the portfolio available for review without leaving paid infrastructure
 
 ## Implementation Evidence
 
-The screenshots below document the infrastructure, deployment and operational work.
+The 21 screenshots below provide detailed supporting evidence. Four key deployment screenshots are displayed above in [Deployment Evidence — At a Glance](#deployment-evidence--at-a-glance).
 
 They capture both successful configurations and the problems encountered during implementation.
 
@@ -724,13 +755,7 @@ EKS infrastructure was provisioned successfully.
 </details>
 
 <details>
-<summary><strong>2. Kubernetes, Networking & HTTPS — 8 screenshots</strong></summary>
-
-### EKS Worker Nodes
-
-Four Kubernetes worker nodes shown in the `Ready` state.
-
-![EKS Worker Nodes](screenshots/10-eks-nodes-running.png)
+<summary><strong>2. Kubernetes, Networking & HTTPS — 7 screenshots</strong></summary>
 
 ### NGINX Ingress
 
@@ -777,13 +802,7 @@ IT-Tools successfully accessed through the configured HTTPS hostname.
 </details>
 
 <details>
-<summary><strong>3. CI/CD & AWS Authentication — 3 screenshots</strong></summary>
-
-### Terraform Apply Workflow
-
-GitHub Actions Terraform pipeline completed successfully.
-
-![Terraform CI/CD](screenshots/20-terraform-pipeline-green.png)
+<summary><strong>3. CI/CD & AWS Authentication — 2 screenshots</strong></summary>
 
 ### AWS OIDC Trust Policy
 
@@ -800,19 +819,13 @@ GitHub Actions workflow showing successful scanning and application delivery.
 </details>
 
 <details>
-<summary><strong>4. Argo CD GitOps — 3 screenshots</strong></summary>
+<summary><strong>4. Argo CD GitOps — 2 screenshots</strong></summary>
 
 ### Argo CD Installation
 
 Argo CD components running in the Kubernetes cluster.
 
 ![Argo CD Installation](screenshots/23-argocd-installed.png)
-
-### Synced and Healthy Application
-
-IT-Tools reported as `Synced` and `Healthy`.
-
-![Argo CD Sync](screenshots/24-argocd-synced.png)
 
 ### Argo CD Resource Tree
 
@@ -823,7 +836,7 @@ Kubernetes resources displayed through Argo CD's application view.
 </details>
 
 <details>
-<summary><strong>5. Monitoring & Troubleshooting — 3 screenshots</strong></summary>
+<summary><strong>5. Monitoring & Troubleshooting — 2 screenshots</strong></summary>
 
 ### Initial Monitoring Failure
 
@@ -837,12 +850,6 @@ Prometheus, Grafana and supporting workloads running after resolving storage and
 
 ![Monitoring Running](screenshots/26-monitoring-running.png)
 
-### Grafana Dashboard
-
-Grafana displaying Kubernetes CPU, memory and namespace-level metrics.
-
-![Grafana Dashboard](screenshots/27-grafana-dashboard.png)
-
 </details>
 
 <details>
@@ -850,7 +857,7 @@ Grafana displaying Kubernetes CPU, memory and namespace-level metrics.
 
 ### GitHub Projects Board
 
-Tracked work across infrastructure provisioning, Kubernetes add-ons, CI/CD, monitoring and documentation.
+Tracked work across infrastructure provisioning, Kubernetes add-ons, CI/CD, monitoring, troubleshooting and documentation.
 
 ![GitHub Project Board](screenshots/30-github-project-board.png)
 
@@ -890,13 +897,13 @@ Understanding those dependencies and working through the failures was as importa
 
 This project was completed as part of my **CoderCo DevOps Engineering programme (January–October 2026)**.
 
-It is a hands-on, production-style engineering project using real AWS infrastructure, but it was not operated as a commercial production system.
+It is an end-to-end AWS engineering project built with real cloud infrastructure and **production-grade engineering practices**. It was not operated as a commercial production service, and it has not been validated against every production-readiness requirement.
 
 The environment was removed after completion to manage costs. The repository remains available as evidence of the infrastructure configuration, implementation, CI/CD workflows, monitoring and troubleshooting.
 
 For related projects:
 
-- [AWS ECS Fargate — End-to-End Infrastructure & CI/CD](https://github.com/ismaaeelahmed11/devops-learning/tree/main/ecs-project)
+- [AWS ECS Fargate — End-to-End Production-Grade Infrastructure & CI/CD](https://github.com/ismaaeelahmed11/devops-learning/tree/main/ecs-project)
 - [Self-Managed Kubernetes — kubeadm & Cluster Operations](https://github.com/ismaaeelahmed11/kubeadm-kubernetes-lab)
 - [Main DevOps Engineering Portfolio](https://github.com/ismaaeelahmed11)
 
@@ -907,6 +914,3 @@ For related projects:
 **Ismaaeel Ahmed** — DevOps & Cloud Engineering
 
 [LinkedIn](https://www.linkedin.com/in/ismaaeelahmed) · [GitHub](https://github.com/ismaaeelahmed11) · [Email](mailto:ismaaeelahmed11@gmail.com)
----
-
-*Built with Terraform, Helm, EKS, ArgoCD, Prometheus, and GitHub Actions.*
