@@ -1,97 +1,147 @@
-# EKS Project — Production-Grade Kubernetes on AWS
 
-A production-grade Kubernetes cluster on Amazon EKS, running IT-Tools over HTTPS with GitOps, monitoring, and full CI/CD automation.
+# AWS EKS — End-to-End Kubernetes Platform, GitOps & Monitoring
 
-**Live URL:** https://eks.ismaaeelahmed.co.uk *(demo — infrastructure destroyed after submission to avoid AWS charges)*
+**AWS · Terraform · Kubernetes · Helm · Argo CD · GitHub Actions · Prometheus · Grafana**
 
+Built an end-to-end, production-style Kubernetes platform on **Amazon EKS**, deploying the IT-Tools application over HTTPS with infrastructure as code, automated CI/CD, GitOps, monitoring and security scanning.
+
+The project covers the full deployment process: provisioning AWS infrastructure with Terraform, configuring networking and Kubernetes add-ons, deploying a containerised application, automating delivery and troubleshooting operational issues.
+
+**Project outcome:** Four EKS worker nodes across two Availability Zones, two IT-Tools replicas, HTTPS access, Argo CD GitOps reconciliation, Prometheus/Grafana monitoring and successful GitHub Actions workflows.
+
+> **Deployment status:** The project was successfully deployed and demonstrated at `https://eks.ismaaeelahmed.co.uk`. AWS resources were subsequently destroyed to avoid ongoing costs. The URL is retained as a record of the deployment, not as a currently available service. Source code, architecture diagrams, pipeline runs and screenshots are preserved in this repository.
 
 ---
-## 🎬 Project Walkthrough
 
-Watch my 2.5-minute technical walkthrough covering the AWS EKS architecture, Terraform infrastructure, Kubernetes application deployment, Argo CD GitOps, monitoring, CI/CD and troubleshooting.
+## Project Walkthrough
+
+A technical walkthrough covering the EKS architecture, Terraform provisioning, Kubernetes application deployment, Argo CD, monitoring, CI/CD and troubleshooting.
 
 [![Watch the AWS EKS Project Walkthrough](https://img.youtube.com/vi/RDmnaTi2auE/hqdefault.jpg)](https://youtu.be/RDmnaTi2auE)
 
-**[▶ Watch the AWS EKS Project Walkthrough on YouTube](https://youtu.be/RDmnaTi2auE)**
+**[▶ Watch the AWS EKS Project Walkthrough (2:29)](https://youtu.be/RDmnaTi2auE)**
 
 ---
 
 ## Architecture
 
-![Architecture](screenshots/31-architecture-drawio.png)
+![AWS EKS Architecture](screenshots/31-architecture-drawio.png)
+
+### How the platform works
+
+**Application traffic**
+
+1. A user accesses `eks.ismaaeelahmed.co.uk` over HTTPS.
+2. Cloudflare DNS resolves the application hostname.
+3. An AWS Network Load Balancer exposes the NGINX Ingress Controller.
+4. NGINX Ingress routes requests to the IT-Tools Kubernetes Service.
+5. The Service distributes traffic to the two IT-Tools application replicas.
+
+**Infrastructure and deployment**
+
+- **Terraform** provisions the VPC, EKS cluster, managed node group and supporting AWS resources.
+- **Helm** installs and configures Kubernetes add-ons.
+- **GitHub Actions** automates infrastructure changes, security scans and application deployment workflows.
+- **AWS OIDC authentication** allows GitHub Actions to assume IAM roles without long-lived AWS access keys.
+
+**Kubernetes platform services**
+
+- **cert-manager** manages TLS certificates issued by Let's Encrypt.
+- **ExternalDNS** manages application DNS records through Cloudflare.
+- **Argo CD** monitors Git and reconciles Kubernetes application resources.
+- **Prometheus** collects metrics from the Kubernetes environment.
+- **Grafana** provides dashboards for cluster resource usage and monitoring.
+
+The EKS managed control plane runs in AWS, while the application workloads and supporting services run on EC2 worker nodes in private subnets.
 
 ---
 
-## Project Board
+## Infrastructure Overview
 
-Tracked progress via [GitHub Projects](https://github.com/users/ismaaeelahmed11/projects/1):
+| Component | Implementation |
+| --- | --- |
+| **Cloud Provider** | AWS — `eu-west-2` (London) |
+| **Kubernetes Platform** | Amazon EKS |
+| **Kubernetes Version** | v1.31 (v1.31.14 shown in deployment evidence) |
+| **Worker Nodes** | 4 × `t3.small` EC2 instances |
+| **Availability Zones** | Two |
+| **Networking** | VPC with public and private subnets |
+| **Ingress** | NGINX Ingress Controller with AWS Network Load Balancer |
+| **TLS Certificates** | cert-manager and Let's Encrypt |
+| **DNS** | ExternalDNS and Cloudflare |
+| **Container Registry** | Amazon ECR |
+| **Application** | IT-Tools — 2 replicas |
+| **GitOps** | Argo CD |
+| **Monitoring** | Prometheus and Grafana |
+| **Infrastructure as Code** | Terraform |
+| **CI/CD** | GitHub Actions with AWS OIDC |
+| **Security Scanning** | Checkov and Trivy |
+| **Persistent Storage** | Amazon EBS CSI Driver |
 
-![Project board](screenshots/30-github-project-board.png)
+The architecture uses production-oriented engineering practices, but this was a time-limited portfolio deployment rather than a commercially operated production service.
 
 ---
 
-## Overview
+## Engineering Decisions
 
-| Component | What it does |
-|-----------|-------------|
-| **EKS Cluster** | Managed Kubernetes control plane (v1.31) |
-| **Worker Nodes** | 4× t3.small EC2 instances in private subnets |
-| **VPC** | Custom network with public (LB) and private (nodes) subnets |
-| **NGINX Ingress** | Routes external HTTP/HTTPS traffic into the cluster |
-| **CertManager** | Auto-issues SSL certificates from Let's Encrypt |
-| **ExternalDNS** | Auto-creates DNS records in Cloudflare |
-| **ArgoCD** | GitOps — syncs cluster state to Git |
-| **Prometheus + Grafana** | Monitoring and dashboards |
-| **IT-Tools** | The app — a collection of developer utilities |
-| **GitHub Actions** | CI/CD for Terraform and app deployment |
+### Why IT-Tools?
 
----
+[IT-Tools](https://github.com/CorentinTh/it-tools) is an open-source collection of developer utilities, including JSON formatters, hash generators, regex testers and subnet calculators.
 
-## The Big Four
+I chose an existing application because the main objective was to build and operate the infrastructure around it rather than focus on application development.
 
-### What is this app?
+This allowed me to work directly with:
 
-**IT-Tools** is an open-source collection of handy utilities for developers — JSON formatters, hash generators, regex testers, subnet calculators, and 80+ other tools. It's a real production container used by thousands of developers.
+- Kubernetes application deployments and services
+- Container registry integration
+- Ingress routing and HTTPS
+- Multiple application replicas
+- GitOps reconciliation
+- CI/CD automation
+- Resource monitoring and troubleshooting
 
-I chose it because the EKS project focuses on **infrastructure and orchestration**, not app development. Deploying a real, useful container demonstrates platform engineering skills better than a custom "Hello World".
+Using an existing application gave me a realistic workload to deploy without introducing unnecessary application or database complexity.
 
-### Why this application?
+### Why Amazon EKS?
 
-- **Real production tool** — used by developers daily, not a toy demo
-- **No database, no complexity** — pure infrastructure focus
-- **Static web app** — easy to expose via Ingress + SSL
-- **Lightweight** — small footprint, quick to scale
-- **Realistic** — this is what you'd deploy in a real DevOps environment
+I had previously built an end-to-end AWS ECS Fargate deployment and wanted to take the next step into Kubernetes platform engineering.
 
-### Why EKS? Why not ECS or a simpler option?
+ECS provided experience with AWS-native container orchestration. EKS introduced additional responsibilities around Kubernetes networking, ingress controllers, Helm, GitOps, persistent storage, cluster capacity and workload management.
 
-**Why not ECS:** I already built a production-grade ECS project earlier in the bootcamp — it taught me container orchestration at the service level. EKS is the natural next step: managed Kubernetes is the industry standard for orchestration at scale, and it teaches portable skills.
+I chose EKS because it combines managed AWS infrastructure with standard Kubernetes tooling.
 
-**Why not Vercel/Netlify:** They don't teach Kubernetes. This project is about learning production Kubernetes: Ingress, CertManager, ExternalDNS, ArgoCD, Prometheus, IRSA, and more.
+### Why four worker nodes?
 
-**Why EKS specifically:**
-- AWS-native managed Kubernetes — used in real DevOps roles
-- Teaches portable skills (Kubernetes runs anywhere)
-- Integrates cleanly with the rest of AWS (IAM, VPC, ECR)
-- Prepares for multi-cloud and hybrid environments
+The original worker-node configuration encountered capacity constraints as additional platform components were deployed.
 
-### How many users are expected?
+NGINX Ingress, Argo CD, cert-manager, ExternalDNS and the monitoring stack all require resources alongside the IT-Tools application.
 
-This is a portfolio project, so no real users. But the architecture is production-ready:
+Some workloads remained in `Pending` while the cluster lacked sufficient capacity.
 
-- **Multi-AZ** — 4 worker nodes across availability zones
-- **2 replicas** of IT-Tools for high availability
-- **Auto-sync + self-heal** via ArgoCD
-- **Horizontal scaling** — bump replicas or add nodes as needed
-- **HTTPS** with auto-renewing Let's Encrypt certs
+I investigated pod scheduling and node resource availability before increasing the managed node group to four `t3.small` instances.
 
-If real traffic hit it, I'd increase replicas or node group size in Terraform. The platform is designed to scale.
+This was a practical exercise in understanding Kubernetes scheduling and infrastructure capacity rather than simply increasing replicas without investigating the underlying issue.
+
+### Availability and scaling
+
+The environment was configured with:
+
+- Four worker nodes across two Availability Zones
+- Two IT-Tools application replicas
+- Kubernetes readiness and liveness probes
+- Resource requests and limits
+- Argo CD automated reconciliation
+- HTTPS with certificate management
+
+These choices provide useful resilience and operational practices for the lab.
+
+I did not conduct formal load testing, disaster recovery exercises or long-term production availability testing, so the project is not presented as production-proven.
 
 ---
 
 ## Project Structure
 
-```
+```text
 eks-project/
 ├── terraform/
 │   ├── main.tf
@@ -104,303 +154,759 @@ eks-project/
 │       ├── eks/
 │       ├── irsa/
 │       └── oidc/
+│
 ├── helm/
 │   ├── ingress-nginx/
 │   ├── cert-manager/
 │   ├── external-dns/
 │   ├── argocd/
 │   └── monitoring/
+│
 ├── k8s/
 │   ├── namespace.yaml
 │   ├── deployment.yaml
 │   ├── service.yaml
 │   ├── ingress.yaml
 │   └── cluster-issuer.yaml
+│
 ├── argocd/
 │   └── applications/
 │       └── it-tools.yaml
+│
 ├── .github/
 │   └── workflows/
 │       ├── terraform-apply.yml
 │       ├── terraform-destroy.yml
 │       └── app-deploy.yml
+│
 ├── screenshots/
-├── docs/
+├── .gitignore
 └── README.md
 ```
 
+The repository separates AWS infrastructure, Helm configuration, application manifests, GitOps resources, CI/CD workflows and deployment evidence.
+
 ---
 
-## Getting Started
+## Infrastructure Provisioning with Terraform
 
-### Prerequisites
+Terraform was used to provision and manage the AWS infrastructure instead of manually configuring each service through the AWS Console.
 
-- AWS account with CLI configured
-- Terraform 1.11+
-- kubectl
-- Helm 3+
-- A domain in Cloudflare
+The infrastructure includes:
 
-### Deploy the infrastructure
+- VPC networking
+- Public and private subnets
+- Internet connectivity and NAT
+- EKS cluster and managed worker nodes
+- IAM roles and permissions
+- OIDC integration
+- Supporting Kubernetes add-on permissions
+
+### Remote Terraform state
+
+The project uses an Amazon S3 backend for Terraform state.
+
+The state bucket was configured with versioning, encryption and public access blocked.
+
+Remote state allows the infrastructure configuration to be managed consistently between local development and GitHub Actions workflows.
+
+The project also uses S3 native state locking to reduce the risk of conflicting Terraform operations.
+
+### Infrastructure workflow
+
+The core provisioning process was:
 
 ```bash
 cd terraform
+
 terraform init
+terraform validate
 terraform plan
 terraform apply
 ```
 
-This creates:
-- VPC with public and private subnets
-- EKS cluster with managed node group
-- IAM roles for EKS, nodes, GitHub Actions, EBS CSI
+The first Terraform plan provisioned 14 VPC-related resources.
 
-### Configure kubectl
+The EKS infrastructure plan subsequently included 33 additional resources.
+
+Terraform outputs were used to obtain infrastructure identifiers and cluster connection details.
+
+**Deployment evidence**
+
+- [Terraform initialisation](screenshots/04-terraform-init.png)
+- [VPC Terraform plan](screenshots/05-terraform-plan-vpc.png)
+- [VPC Terraform apply](screenshots/06-terraform-apply-vpc.png)
+- [EKS Terraform plan](screenshots/08-terraform-plan-eks.png)
+- [EKS Terraform apply](screenshots/09-terraform-apply-eks.png)
+
+---
+
+## Kubernetes Application Deployment
+
+### Connecting to EKS
+
+After provisioning the cluster, I configured `kubectl` using the AWS CLI:
 
 ```bash
-aws eks update-kubeconfig --name eks-project-cluster --region eu-west-2
+aws eks update-kubeconfig \
+  --name eks-project-cluster \
+  --region eu-west-2
+
 kubectl get nodes
 ```
 
-### Install cluster add-ons
+The deployment evidence shows four Kubernetes worker nodes in the `Ready` state.
 
-```bash
-# NGINX Ingress
-cd helm/ingress-nginx
-helm install ingress-nginx ingress-nginx/ingress-nginx \
-  --namespace ingress-nginx --create-namespace --values values.yaml
+### Deploying IT-Tools
 
-# CertManager
-cd ../cert-manager
-helm install cert-manager jetstack/cert-manager \
-  --namespace cert-manager --create-namespace --values values.yaml
+The IT-Tools container image was pulled from Docker Hub, tagged and published to Amazon ECR.
 
-# ExternalDNS (requires Cloudflare API token secret)
-kubectl create namespace external-dns
-kubectl create secret generic cloudflare-api-token \
-  --namespace external-dns --from-literal=api-token=YOUR_TOKEN
-cd ../external-dns
-helm install external-dns external-dns/external-dns \
-  --namespace external-dns --values values.yaml
-```
+Kubernetes manifests were then used to define the application resources.
 
-### Deploy the app
+These included:
+
+- Namespace
+- Deployment
+- ClusterIP Service
+- Ingress
+- ClusterIssuer
+
+The application was configured with two replicas.
 
 ```bash
 kubectl apply -f k8s/
+
+kubectl get deployments -A
+kubectl get pods -A
+kubectl get ingress -A
 ```
 
-### Set up ArgoCD
+These commands are run from the repository root.
+
+### Application networking
+
+NGINX Ingress was installed through Helm and exposed externally using an AWS Network Load Balancer.
+
+ExternalDNS was configured to manage Cloudflare DNS records based on Kubernetes resources.
+
+cert-manager used Let's Encrypt to issue the TLS certificate.
+
+This allowed the application to be accessed over HTTPS at:
+
+`https://eks.ismaaeelahmed.co.uk`
+
+**Deployment evidence**
+
+- [EKS worker nodes](screenshots/10-eks-nodes-running.png)
+- [NGINX Ingress](screenshots/11-nginx-ingress-installed.png)
+- [cert-manager](screenshots/12-certmanager-installed.png)
+- [ClusterIssuer](screenshots/13-clusterissuer-ready.png)
+- [ExternalDNS](screenshots/14-externaldns-installed.png)
+- [IT-Tools deployment](screenshots/16-it-tools-deployed.png)
+- [Application over HTTPS](screenshots/17-it-tools-live-https.png)
+
+---
+
+## GitOps with Argo CD
+
+Argo CD was implemented to manage Kubernetes application resources declaratively through Git.
+
+Instead of relying only on manual `kubectl apply` commands, the application definition was stored in the repository and connected to Argo CD.
+
+### How it works
+
+1. The desired Kubernetes configuration is stored in Git.
+2. Argo CD monitors the configured repository path.
+3. Changes are detected and reconciled against the cluster.
+4. Argo CD reports application synchronisation and health status.
+5. Automated reconciliation can restore resources that drift from the desired configuration.
+
+The IT-Tools application was successfully shown as **Synced** and **Healthy**.
+
+This provided direct experience with managing Kubernetes application state through Git rather than relying entirely on manual changes.
+
+**Evidence**
+
+- [Argo CD installed](screenshots/23-argocd-installed.png)
+- [Application synced and healthy](screenshots/24-argocd-synced.png)
+- [Argo CD resource tree](screenshots/29-argocd-ui.png)
+
+---
+
+## CI/CD with GitHub Actions
+
+Three GitHub Actions workflows were used to automate infrastructure management and application delivery.
+
+| Workflow | Trigger | Responsibility |
+| --- | --- | --- |
+| **Terraform Apply** | Changes pushed to `terraform/**` | Terraform plan and infrastructure apply |
+| **Terraform Destroy** | Manual confirmation | Infrastructure teardown |
+| **App Build, Scan & Deploy** | Changes pushed to `k8s/**` | Security scanning, container publishing and application deployment |
+
+### Infrastructure automation
+
+The Terraform Apply workflow authenticates to AWS using OIDC, then executes the Terraform deployment process.
+
+This removes the need to store long-lived AWS access keys in GitHub Actions secrets.
+
+### Application delivery
+
+The application workflow includes:
+
+1. Checkov scanning for Terraform configuration.
+2. Container image preparation.
+3. Trivy container security scanning.
+4. Publishing the image to Amazon ECR.
+5. Deploying the application to Amazon EKS.
+
+### Security considerations
+
+The workflows use AWS IAM roles and OIDC federation.
+
+This limits reliance on permanent credentials and supports role-based access from the CI/CD environment.
+
+The project also uses:
+
+- IAM permissions
+- HTTPS/TLS
+- Checkov infrastructure scanning
+- Trivy image scanning
+- Private networking for worker nodes
+
+These controls demonstrate practical security considerations, although they do not represent a complete enterprise security review.
+
+**Evidence**
+
+- [Terraform Apply workflow](screenshots/20-terraform-pipeline-green.png)
+- [OIDC IAM trust policy](screenshots/20a-oidc-trust-policy.png)
+- [Application deployment workflow](screenshots/21-app-deploy-pipeline-green.png)
+
+---
+
+## Monitoring and Observability
+
+Prometheus and Grafana were deployed using the `kube-prometheus-stack` Helm chart.
+
+The monitoring environment provided visibility into cluster and workload resource usage.
+
+The deployment included:
+
+- Prometheus
+- Grafana
+- Alertmanager
+- Node exporters
+- Kubernetes monitoring components
+
+### Metrics captured
+
+Grafana dashboards displayed:
+
+- Cluster CPU utilisation
+- Cluster memory utilisation
+- Namespace-level resource usage
+- Resource consumption across platform services
+- Live Kubernetes resource metrics
+
+The captured dashboard showed approximately **3.54% CPU utilisation** and **52.1% memory utilisation** at the time of observation.
+
+These figures represent a deployment snapshot, not a long-term performance benchmark.
+
+### Monitoring deployment issue
+
+The monitoring stack initially failed because workloads requiring persistent volumes could not schedule successfully.
+
+Investigating this issue led to configuring the Amazon EBS CSI Driver and its required AWS permissions.
+
+Once the storage and node-capacity issues were resolved, the monitoring workloads reached the `Running` state.
+
+**Evidence**
+
+- [Monitoring pods initially Pending](screenshots/25-monitoring-debug-pending-pods.png)
+- [Monitoring workloads Running](screenshots/26-monitoring-running.png)
+- [Grafana monitoring dashboard](screenshots/27-grafana-dashboard.png)
+
+---
+
+## Troubleshooting and Root Cause Analysis
+
+Several technical issues arose during the project. Rather than leaving them out, I've documented what failed, what I investigated and how each issue was resolved.
+
+### 1. Container port configuration
+
+**Problem:** The container's port configuration conflicted with the intended non-root runtime configuration.
+
+**Investigation:** Reviewed the container's listening port and the relationship between the application, Service and external HTTPS entry point.
+
+**Resolution:** Configured the application to use port `8080` internally while exposing HTTPS through the ingress/load-balancing layer.
+
+**Takeaway:** Container ports, Kubernetes Services and external listeners are separate parts of the traffic path and need to be configured consistently.
+
+### 2. GitHub Actions OIDC trust policy
+
+**Problem:** GitHub Actions could not authenticate to AWS as expected.
+
+**Investigation:** Examined the IAM role trust policy and OIDC subject claim conditions.
+
+**Resolution:** Updated the trust policy conditions to support the subject claim formats encountered during the deployment.
+
+**Takeaway:** OIDC authentication depends on matching token claims and IAM trust policy conditions. Authentication problems require inspecting both sides.
+
+### 3. Pods stuck in `Pending`
+
+**Problem:** Kubernetes workloads remained in the `Pending` state after deploying additional platform components.
+
+**Investigation:** Inspected pod scheduling, node capacity and the resource requirements of the Kubernetes add-ons.
+
+**Root cause:** The existing `t3.small` worker nodes could not accommodate the growing number of workloads.
+
+**Resolution:** Adjusted the EKS managed node group to four worker nodes.
+
+**Takeaway:** Platform components consume cluster resources too. Capacity planning needs to account for ingress, GitOps, monitoring and other supporting services, not just the application.
+
+### 4. PersistentVolumeClaims stuck in `Pending`
+
+**Problem:** Prometheus and other monitoring workloads could not successfully provision persistent storage.
+
+**Investigation:** Checked the PVCs, storage provisioning and EBS CSI Driver configuration.
+
+**Root cause:** The EBS CSI Driver was initially missing. After installation, it also required the appropriate IAM permissions.
+
+**Resolution:** Configured the EBS CSI Driver as an EKS add-on and provided the required IAM role through IRSA.
+
+**Takeaway:** Kubernetes storage depends on correctly configured CSI drivers and cloud permissions. A running cluster does not automatically guarantee working persistent storage.
+
+### 5. EKS cluster access conflicts
+
+**Problem:** Kubernetes access configuration encountered conflicts during EKS setup.
+
+**Investigation:** Reviewed the Terraform EKS module's cluster creator administration settings alongside explicitly managed access entries.
+
+**Root cause:** Automatic cluster creator administrator configuration conflicted with the explicit access configuration.
+
+**Resolution:** Disabled the conflicting automatic configuration and managed the EKS access entries explicitly.
+
+**Takeaway:** Cluster access should have a clear source of configuration to avoid conflicting IAM and Kubernetes authentication behaviour.
+
+### What these issues demonstrated
+
+The most valuable part of the project was understanding why systems failed.
+
+Troubleshooting involved working across several layers:
+
+- Terraform infrastructure configuration
+- AWS IAM and OIDC
+- Kubernetes scheduling
+- Persistent storage
+- Container networking
+- EKS access management
+- GitHub Actions workflows
+
+Each incident helped connect the infrastructure configuration to the behaviour of the running platform.
+
+---
+
+## Deployment Guide
+
+This section outlines how the environment was deployed.
+
+**Important:** The original AWS resources have been destroyed. Recreating the environment incurs AWS charges and requires valid AWS credentials, Cloudflare configuration, IAM permissions and review of the current Terraform and Helm dependencies.
+
+The configuration was built against EKS Kubernetes v1.31. Review version compatibility and AWS support before attempting a fresh deployment.
+
+### Prerequisites
+
+- AWS account with suitable IAM permissions
+- AWS CLI configured
+- Terraform compatible with the repository
+- `kubectl`
+- Helm 3
+- Cloudflare-managed domain
+- Appropriate DNS and API token configuration
+- GitHub Actions OIDC configuration for automated workflows
+
+### 1. Clone the repository
 
 ```bash
-cd helm/argocd
-helm install argocd argo/argo-cd \
-  --namespace argocd --create-namespace --values values.yaml
+git clone https://github.com/ismaaeelahmed11/eks-project.git
 
+cd eks-project
+```
+
+### 2. Review Terraform configuration
+
+Before deploying, review:
+
+```text
+terraform/
+```
+
+Check AWS region, cluster configuration, backend settings, networking, worker-node configuration and IAM permissions.
+
+The remote state backend must be correctly configured and available before running `terraform init`.
+
+### 3. Provision infrastructure
+
+From the repository root:
+
+```bash
+cd terraform
+
+terraform init
+terraform validate
+terraform plan
+terraform apply
+
+cd ..
+```
+
+Review the Terraform plan before approving infrastructure changes.
+
+### 4. Configure Kubernetes access
+
+```bash
+aws eks update-kubeconfig \
+  --name eks-project-cluster \
+  --region eu-west-2
+
+kubectl get nodes
+kubectl get pods -A
+```
+
+### 5. Configure cluster add-ons
+
+The project uses Helm configurations under:
+
+```text
+helm/ingress-nginx/
+helm/cert-manager/
+helm/external-dns/
+helm/argocd/
+helm/monitoring/
+```
+
+The original deployment installed NGINX Ingress, cert-manager, ExternalDNS, Argo CD and the Prometheus monitoring stack.
+
+Helm repositories, chart versions, namespace configuration, custom values and cloud credentials should be checked before installation.
+
+ExternalDNS also requires a Cloudflare API token with appropriate permissions.
+
+Do not commit API tokens or other credentials to the repository.
+
+### 6. Deploy application manifests
+
+From the repository root:
+
+```bash
+kubectl apply -f k8s/
+
+kubectl get deployments -A
+kubectl get pods -A
+kubectl get services -A
+kubectl get ingress -A
+```
+
+The application configuration includes two IT-Tools replicas and a Kubernetes Service exposed through NGINX Ingress.
+
+### 7. Configure Argo CD
+
+The Argo CD application manifest is stored at:
+
+```text
+argocd/applications/it-tools.yaml
+```
+
+Once Argo CD is installed and configured, apply the application definition:
+
+```bash
 kubectl apply -f argocd/applications/it-tools.yaml
 ```
 
-### Install monitoring
+Verify that the application reaches `Synced` and `Healthy`.
+
+### 8. Validate the deployment
+
+Useful validation commands include:
 
 ```bash
-cd helm/monitoring
-helm install monitoring prometheus-community/kube-prometheus-stack \
-  --namespace monitoring --create-namespace --values values.yaml
+kubectl get nodes
+
+kubectl get pods -A
+
+kubectl get ingress -A
+
+kubectl get certificates -A
+
+kubectl get pvc -A
 ```
 
-### Access the app
+Check the application through its configured HTTPS hostname and inspect Grafana dashboards and GitHub Actions workflow results.
 
-```
-https://eks.ismaaeelahmed.co.uk
-```
+### 9. Infrastructure teardown
 
----
+A manually triggered GitHub Actions teardown workflow was created for removing AWS infrastructure after the demonstration.
 
-## CI/CD Pipelines
+Always review Terraform plans and destroy operations carefully. Resources such as state backends, persistent storage, load balancers or externally managed DNS records may require separate handling.
 
-| Pipeline | Trigger | What it does |
-|----------|---------|-------------|
-| **Terraform Apply** | Push to `terraform/**` | Provisions EKS, VPC, IAM via OIDC |
-| **Terraform Destroy** | Manual (confirm "destroy") | Tears down all infrastructure |
-| **App Build, Scan & Deploy** | Push to `k8s/**` | Checkov scan → Trivy scan → push ECR → deploy to EKS |
-
-All pipelines use **OIDC** — no static AWS keys.
-
----
-
-## What I Learned
-
-- **EKS architecture** — control plane vs worker nodes, managed node groups
-- **IRSA** (IAM Roles for Service Accounts) — pods assuming AWS roles via OIDC
-- **Ingress + CertManager + ExternalDNS** — the trio that automates external access
-- **GitOps with ArgoCD** — cluster state follows Git, self-heals drift
-- **Prometheus + Grafana** — real observability with custom dashboards
-- **OIDC authentication** — no more static AWS credentials in CI/CD
-- **Node capacity planning** — t3.small limits, EBS CSI driver, pod scheduling
-- **Debugging EKS** — access entries, kubectl auth, PVC binding
-
----
-
-## Troubleshooting Journey
-
-**Issue 1: Container port conflicts**
-Non-root containers can't bind to privileged ports. Fixed by using 8080 for the container and 443 at the load balancer.
-
-**Issue 2: OIDC trust policy**
-GitHub's immutable subject claims broke the trust policy. Fixed by adding both old and new formats to `sub` conditions.
-
-**Issue 3: Pods stuck Pending**
-Node capacity limit on t3.small (~11 pods per node). Fixed by scaling to 4 nodes.
-
-**Issue 4: PVCs stuck Pending**
-EBS CSI driver wasn't installed. Then it crashed without an IAM role. Fixed by adding IRSA + the driver as an EKS add-on.
-
-**Issue 5: EKS access entries conflict**
-Module's `cluster_creator` auto-admin clashed with explicit access entries. Fixed by disabling auto-admin and managing entries explicitly.
+Destroying the EKS cluster does not automatically guarantee that every associated AWS resource has been removed.
 
 ---
 
 ## Cost Management
 
-EKS is expensive to run continuously:
+Amazon EKS and its supporting AWS infrastructure incur ongoing charges, even when the application receives no traffic.
 
-- Control plane: ~$2.40/day
-- 4× t3.small nodes: ~$2.40/day
-- NAT Gateway: ~$1.08/day
-- Load balancer: ~$0.50/day
-- **Total: ~$6.50/day (~£45/week)**
+The original project estimate was approximately **$6.50 per day**, including the EKS control plane, EC2 worker nodes, NAT Gateway and load-balancing resources.
 
-Destroyed after submission. Screenshots and code preserved in this repo.
+This was a historical estimate for the demonstration configuration, **not a current AWS pricing quotation**. Actual charges depend on service pricing, Kubernetes support tier, region, resource usage and other factors.
+
+To manage costs, I:
+
+- Used a defined demonstration environment.
+- Included infrastructure teardown in the GitHub Actions workflows.
+- Removed the AWS resources after completing the project.
+- Preserved screenshots, source code, architecture diagrams and pipeline evidence.
+
+This kept the portfolio available for review without leaving paid infrastructure running indefinitely.
 
 ---
 
-## Screenshots
+## Implementation Evidence
 
-### 1. Project Structure
-Initial repo layout — Terraform modules, Helm folders, K8s manifests, CI/CD workflow folders, and docs.
+The screenshots below document the infrastructure, deployment and operational work.
 
-![Repo structure](screenshots/01-repo-structure.png)
+They capture both successful configurations and the problems encountered during implementation.
 
-### 2. S3 Remote State
-Terraform state bucket with versioning, encryption, and public access blocked. This is where the state file lives — shared between my laptop and GitHub Actions.
+<details>
+<summary><strong>1. Infrastructure & Terraform — 7 screenshots</strong></summary>
 
-![S3 state bucket](screenshots/02-tfstate-bucket.png)
+### Repository Structure
 
-### 3. Terraform Initialised
-Backend connected to S3, AWS provider downloaded, VPC module loaded. Everything ready for the first plan.
+Terraform modules, Helm configuration, Kubernetes manifests, CI/CD workflows and project documentation.
 
-![Terraform init](screenshots/04-terraform-init.png)
+![Repository Structure](screenshots/01-repo-structure.png)
 
-### 4. Terraform Plan — VPC
-14 resources to create: VPC, 2 public subnets, 2 private subnets, Internet Gateway, NAT Gateway, Elastic IP, 2 route tables, 4 route table associations.
+### S3 Remote State
 
-![Terraform plan VPC](screenshots/05-terraform-plan-vpc.png)
+S3 bucket configured for Terraform state storage, versioning, encryption and blocked public access.
 
-### 5. Terraform Apply — VPC
-All 14 resources created. VPC ID and subnet IDs printed as outputs — these feed into the EKS module.
+![S3 Terraform State](screenshots/02-tfstate-bucket.png)
 
-![Terraform apply VPC](screenshots/06-terraform-apply-vpc.png)
+### Terraform Initialisation
 
-### 6. Terraform Plan — EKS
-33 resources to add. This includes the EKS control plane, managed node group, IAM roles, security groups, KMS key, OIDC provider, and essential add-ons (CoreDNS, kube-proxy, VPC CNI).
+Terraform initialised against the configured S3 backend.
 
-![Terraform plan EKS](screenshots/08-terraform-plan-eks.png)
+![Terraform Init](screenshots/04-terraform-init.png)
 
-### 7. Terraform Apply — EKS
-EKS cluster and node group created. Cluster endpoint and name printed as outputs. The apply takes ~15 minutes because AWS provisions the control plane in the background.
+### Terraform VPC Plan
 
-![Terraform apply EKS](screenshots/09-terraform-apply-eks.png)
+The VPC plan included 14 resources for networking and supporting infrastructure.
 
-### 8. EKS Nodes Running
-`kubectl get nodes` showing 4 worker nodes in Ready state, running Kubernetes v1.31.14. These nodes are spread across availability zones for resilience.
+![VPC Terraform Plan](screenshots/05-terraform-plan-vpc.png)
 
-![EKS nodes running](screenshots/10-eks-nodes-running.png)
+### Terraform VPC Apply
 
-### 9. NGINX Ingress Installed
-NGINX Ingress Controller deployed via Helm. AWS automatically provisioned a Network Load Balancer (visible in the EXTERNAL-IP column). This is the entry point for external traffic.
+Terraform successfully provisioned the VPC resources and generated outputs.
 
-![NGINX Ingress installed](screenshots/11-nginx-ingress-installed.png)
+![VPC Terraform Apply](screenshots/06-terraform-apply-vpc.png)
 
-### 10. CertManager Installed
-All three CertManager pods running: the main controller, the CA injector, and the webhook. CertManager watches Ingress resources and requests SSL certificates from Let's Encrypt automatically.
+### Terraform EKS Plan
 
-![CertManager installed](screenshots/12-certmanager-installed.png)
+Terraform planned the EKS infrastructure, including cluster components, IAM roles, security groups and add-ons.
 
-### 11. ClusterIssuer Ready
-The Let's Encrypt ClusterIssuer is Ready. This tells CertManager how to authenticate with Let's Encrypt using HTTP-01 challenges — NGINX Ingress serves the challenge file on port 80.
+![EKS Terraform Plan](screenshots/08-terraform-plan-eks.png)
 
-![ClusterIssuer ready](screenshots/13-clusterissuer-ready.png)
+### Terraform EKS Apply
 
-### 12. ExternalDNS Installed
-ExternalDNS pod running. It watches Kubernetes Ingress resources and automatically creates DNS records in Cloudflare — no more manual DNS updates.
+EKS infrastructure was provisioned successfully.
 
-![ExternalDNS installed](screenshots/14-externaldns-installed.png)
+![EKS Terraform Apply](screenshots/09-terraform-apply-eks.png)
 
-### 13. IT-Tools Pushed to ECR
-Pulled the official IT-Tools image from Docker Hub, retagged it for ECR, and pushed it. Now EKS can pull it from our private registry instead of Docker Hub.
+</details>
 
-![IT-Tools pushed to ECR](screenshots/15-it-tools-pushed-to-ecr.png)
+<details>
+<summary><strong>2. Kubernetes, Networking & HTTPS — 8 screenshots</strong></summary>
 
-### 14. IT-Tools Deployed
-All resources created: 2 IT-Tools pods Running, ClusterIP service, and Ingress with the host `eks.ismaaeelahmed.co.uk`. CertManager is already spinning up a pod to validate domain ownership.
+### EKS Worker Nodes
 
-![IT-Tools deployed](screenshots/16-it-tools-deployed.png)
+Four Kubernetes worker nodes shown in the `Ready` state.
 
-### 15. HTTPS Live
-IT-Tools running at `https://eks.ismaaeelahmed.co.uk` with a valid Let's Encrypt certificate. The padlock shows the SSL certificate was issued and trusted automatically.
+![EKS Worker Nodes](screenshots/10-eks-nodes-running.png)
 
-![IT-Tools live HTTPS](screenshots/17-it-tools-live-https.png)
+### NGINX Ingress
 
-### 16. Terraform Apply Pipeline Green
-The Terraform Apply GitHub Actions pipeline succeeded. It uses OIDC to assume an AWS role — no static keys — and runs `terraform plan` followed by `terraform apply` on every push to `terraform/**`.
+NGINX Ingress Controller deployed through Helm with an external AWS Network Load Balancer.
 
-![Terraform Apply pipeline green](screenshots/20-terraform-pipeline-green.png)
+![NGINX Ingress](screenshots/11-nginx-ingress-installed.png)
 
-### 17. OIDC Trust Policy
-The GitHub Actions IAM role's trust policy. It accepts both the classic subject claim (`repo:owner/name:*`) and the newer immutable format with numeric IDs — needed because GitHub changed how they issue OIDC tokens.
+### cert-manager
 
-![OIDC trust policy](screenshots/20a-oidc-trust-policy.png)
+cert-manager controller components running.
 
-### 18. App Deploy Pipeline Green
-The App Build, Scan & Deploy pipeline. Two jobs: **Checkov** (scans Terraform for security issues) and **build-and-deploy** (Trivy scans the image, pushes to ECR, deploys to EKS via kubectl). Both green.
+![cert-manager](screenshots/12-certmanager-installed.png)
 
-![App Deploy pipeline green](screenshots/21-app-deploy-pipeline-green.png)
+### ClusterIssuer
 
-### 19. ArgoCD Installed
-All ArgoCD pods running in the `argocd` namespace: application controller, appset controller, dex server, notifications controller, Redis, repo server, and the main API server.
+Let's Encrypt ClusterIssuer configured and reporting `Ready`.
 
-![ArgoCD installed](screenshots/23-argocd-installed.png)
+![ClusterIssuer](screenshots/13-clusterissuer-ready.png)
 
-### 20. ArgoCD Synced
-The `it-tools` Application is Synced and Healthy. ArgoCD watches the `k8s/` folder in the repo and reconciles cluster state automatically. Any change pushed to Git gets applied within 3 minutes.
+### ExternalDNS
 
-![ArgoCD synced](screenshots/24-argocd-synced.png)
+ExternalDNS running and configured for Cloudflare DNS management.
 
-### 21. ArgoCD UI — GitOps Tree
-The ArgoCD visual tree: namespace → service → deployment → replicaset → 2 running pods. Also shows the Ingress, ClusterIssuer, and the issued TLS certificate. This is what GitOps looks like in action.
+![ExternalDNS](screenshots/14-externaldns-installed.png)
 
-![ArgoCD UI tree](screenshots/29-argocd-ui.png)
+### IT-Tools Container Image
 
-### 22. Monitoring Debug — Pending Pods
-Initial monitoring install failed. Alertmanager, Grafana, and Prometheus pods stuck Pending. Root cause: EBS CSI driver wasn't installed, so PVCs couldn't bind.
+IT-Tools image pushed to Amazon ECR.
 
-![Monitoring pending (debug)](screenshots/25-monitoring-debug-pending-pods.png)
+![IT-Tools ECR](screenshots/15-it-tools-pushed-to-ecr.png)
 
-### 23. Monitoring Running
-After installing the EBS CSI driver, adding IRSA for it, and scaling nodes to 4× t3.small, all monitoring pods are Running. Prometheus, Grafana, Alertmanager, and node exporters.
+### IT-Tools Deployment
 
-![Monitoring running](screenshots/26-monitoring-running.png)
+Two application replicas, Service and Ingress resources deployed.
 
-### 24. Grafana Dashboard
-Grafana showing live Kubernetes cluster metrics: CPU utilisation (3.54%), memory utilisation (52.1%), per-namespace breakdown (monitoring, argocd, cert-manager, kube-system, it-tools), and live resource charts.
+![IT-Tools Deployment](screenshots/16-it-tools-deployed.png)
 
-![Grafana dashboard](screenshots/27-grafana-dashboard.png)
+### HTTPS Application Access
 
-### 25. Project Board
-GitHub Projects board tracking all tasks. Todo, In Progress, and Done columns show the full project breakdown — from VPC setup to Prometheus installation to README.
+IT-Tools successfully accessed through the configured HTTPS hostname.
 
-![GitHub Project board](screenshots/30-github-project-board.png)
+![IT-Tools HTTPS](screenshots/17-it-tools-live-https.png)
 
+</details>
+
+<details>
+<summary><strong>3. CI/CD & AWS Authentication — 3 screenshots</strong></summary>
+
+### Terraform Apply Workflow
+
+GitHub Actions Terraform pipeline completed successfully.
+
+![Terraform CI/CD](screenshots/20-terraform-pipeline-green.png)
+
+### AWS OIDC Trust Policy
+
+IAM trust policy used by GitHub Actions for AWS authentication.
+
+![OIDC Trust Policy](screenshots/20a-oidc-trust-policy.png)
+
+### Application Build, Scan & Deploy
+
+GitHub Actions workflow showing successful scanning and application delivery.
+
+![Application CI/CD](screenshots/21-app-deploy-pipeline-green.png)
+
+</details>
+
+<details>
+<summary><strong>4. Argo CD GitOps — 3 screenshots</strong></summary>
+
+### Argo CD Installation
+
+Argo CD components running in the Kubernetes cluster.
+
+![Argo CD Installation](screenshots/23-argocd-installed.png)
+
+### Synced and Healthy Application
+
+IT-Tools reported as `Synced` and `Healthy`.
+
+![Argo CD Sync](screenshots/24-argocd-synced.png)
+
+### Argo CD Resource Tree
+
+Kubernetes resources displayed through Argo CD's application view.
+
+![Argo CD Application Tree](screenshots/29-argocd-ui.png)
+
+</details>
+
+<details>
+<summary><strong>5. Monitoring & Troubleshooting — 3 screenshots</strong></summary>
+
+### Initial Monitoring Failure
+
+Monitoring pods stuck in `Pending` while persistent storage dependencies were unresolved.
+
+![Monitoring Pods Pending](screenshots/25-monitoring-debug-pending-pods.png)
+
+### Monitoring Workloads Running
+
+Prometheus, Grafana and supporting workloads running after resolving storage and node-capacity issues.
+
+![Monitoring Running](screenshots/26-monitoring-running.png)
+
+### Grafana Dashboard
+
+Grafana displaying Kubernetes CPU, memory and namespace-level metrics.
+
+![Grafana Dashboard](screenshots/27-grafana-dashboard.png)
+
+</details>
+
+<details>
+<summary><strong>6. Project Tracking — 1 screenshot</strong></summary>
+
+### GitHub Projects Board
+
+Tracked work across infrastructure provisioning, Kubernetes add-ons, CI/CD, monitoring and documentation.
+
+![GitHub Project Board](screenshots/30-github-project-board.png)
+
+</details>
+
+---
+
+## Project Planning
+
+I used GitHub Projects to track tasks across the deployment, including infrastructure setup, Kubernetes configuration, automation, monitoring, troubleshooting and documentation.
+
+[**View GitHub Project Board →**](https://github.com/users/ismaaeelahmed11/projects/1)
+
+---
+
+## What This Project Demonstrates
+
+This project brought together infrastructure automation and Kubernetes platform operations in one end-to-end deployment.
+
+The main areas of engineering work were:
+
+- **AWS infrastructure:** Provisioning EKS, VPC networking, IAM and supporting resources with Terraform.
+- **Kubernetes:** Managing application deployments, Services, Ingress, storage dependencies, health probes and workload capacity.
+- **CI/CD:** Automating Terraform and application delivery through GitHub Actions.
+- **GitOps:** Managing application state through Argo CD reconciliation.
+- **Monitoring:** Deploying and troubleshooting Prometheus/Grafana.
+- **Security:** Using IAM roles, OIDC, HTTPS and automated configuration/image scanning.
+- **Troubleshooting:** Diagnosing real configuration, authentication, storage and scheduling problems.
+
+The biggest takeaway was seeing how the different layers interact. A Kubernetes deployment problem can originate in AWS permissions, node capacity, networking or storage rather than in the application itself.
+
+Understanding those dependencies and working through the failures was as important as getting the environment deployed.
+
+---
+
+## Project Context
+
+This project was completed as part of my **CoderCo DevOps Engineering programme (January–October 2026)**.
+
+It is a hands-on, production-style engineering project using real AWS infrastructure, but it was not operated as a commercial production system.
+
+The environment was removed after completion to manage costs. The repository remains available as evidence of the infrastructure configuration, implementation, CI/CD workflows, monitoring and troubleshooting.
+
+For related projects:
+
+- [AWS ECS Fargate — End-to-End Infrastructure & CI/CD](https://github.com/ismaaeelahmed11/devops-learning/tree/main/ecs-project)
+- [Self-Managed Kubernetes — kubeadm & Cluster Operations](https://github.com/ismaaeelahmed11/kubeadm-kubernetes-lab)
+- [Main DevOps Engineering Portfolio](https://github.com/ismaaeelahmed11)
+
+---
+
+## Connect
+
+**Ismaaeel Ahmed** — DevOps & Cloud Engineering
+
+[LinkedIn](https://www.linkedin.com/in/ismaaeelahmed) · [GitHub](https://github.com/ismaaeelahmed11) · [Email](mailto:ismaaeelahmed11@gmail.com)
 ---
 
 *Built with Terraform, Helm, EKS, ArgoCD, Prometheus, and GitHub Actions.*
