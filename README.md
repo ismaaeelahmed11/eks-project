@@ -1,17 +1,21 @@
-# AWS EKS — Production-Grade DevOps Practices | Terraform, Kubernetes, CI/CD, GitOps & Monitoring
+# AWS EKS — Production-Grade Kubernetes Platform | Terraform, CI/CD, GitOps & Monitoring
 
-**AWS · Terraform · Kubernetes · Helm · GitHub Actions · Argo CD · Prometheus · Grafana · IAM/OIDC · Cloudflare**
+**AWS EKS · Terraform · Kubernetes · Helm · GitHub Actions · Argo CD · Prometheus · Grafana · IAM/OIDC · Cloudflare**
 
-> **Completed portfolio project | AWS eu-west-2 (London)**  
-> Deployed successfully, demonstrated over HTTPS and subsequently **torn down to avoid recurring AWS costs**. The historical URL, [`eks.ismaaeelahmed.co.uk`](https://eks.ismaaeelahmed.co.uk), is **not a live demo**. The repository preserves the infrastructure code, Kubernetes manifests, automation, architecture, walkthrough and implementation evidence.
+> **Completed hands-on engineering project | AWS eu-west-2 (London)**  
+> Deployed and verified on real AWS infrastructure, then intentionally **torn down to avoid recurring costs**. The historical domain `eks.ismaaeelahmed.co.uk` is **not a live demo**. The code, architecture, workflows, technical walkthrough and deployment evidence remain available.
+
+**Quick access:** [Video walkthrough](https://youtu.be/RDmnaTi2auE) · [Architecture](#architecture) · [Deployment evidence](#deployment-proof--four-key-screenshots) · [Terraform](#infrastructure-as-code--terraform) · [CI/CD](#cicd--github-actions--aws-oidc) · [GitOps](#gitops--argo-cd) · [Troubleshooting](#troubleshooting--root-cause-analysis) · [Screenshots](#implementation-evidence)
+
+**What this project demonstrates:** I can connect the **AWS infrastructure layer** to the **Kubernetes application layer**, configure GitHub-to-AWS access, deploy and observe workloads, and diagnose problems that cross IAM, networking, scheduling and storage.
 
 ## Project Overview
 
-I designed, provisioned, deployed and troubleshot an end-to-end **Amazon EKS Kubernetes platform**, applying production-grade DevOps practices across **AWS infrastructure, Terraform, container orchestration, CI/CD, GitOps, identity/security and observability**. The focus was building a working system, understanding its dependencies and proving the outcome with code and deployment evidence.
+I built and troubleshot an end-to-end **Amazon EKS Kubernetes platform**, applying **production-grade engineering practices** across Terraform infrastructure, Kubernetes orchestration, CI/CD, GitOps, IAM, HTTPS and monitoring. Rather than stopping at a successful deployment, I documented what failed, how I diagnosed it and what I would improve.
 
-Starting with **Terraform-managed AWS infrastructure**, I configured private worker-node networking, deployed IT-Tools onto Kubernetes, exposed it through **NGINX Ingress and HTTPS**, automated infrastructure and application workflows with **GitHub Actions**, connected **Argo CD** for Git-based reconciliation, and deployed **Prometheus/Grafana** for resource monitoring.
+Starting with **Terraform-managed AWS networking and EKS**, I deployed the open-source IT-Tools application onto Kubernetes, exposed it via **NGINX Ingress and HTTPS**, integrated **GitHub Actions** and **Argo CD**, and deployed **Prometheus/Grafana** for cluster visibility.
 
-The most valuable part was **working through real failures**: authentication issues, pods stuck in `Pending`, persistent storage provisioning, cluster access conflicts and container port configuration. I diagnosed these across **AWS IAM, Terraform, Kubernetes scheduling, CSI storage and CI/CD**, then documented the fixes.
+The most valuable work was resolving failures across **AWS IAM/OIDC, EKS access configuration, Pod scheduling, EBS CSI storage, resource capacity and deployment automation**. This repository includes the manifests, workflows, architecture, root-cause notes and captured outcomes needed to review that work.
 
 ### Outcomes at a Glance
 
@@ -28,11 +32,11 @@ The most valuable part was **working through real failures**: authentication iss
 | **Troubleshooting** | Investigated and resolved storage, capacity, IAM/OIDC and cluster-access issues |
 | **Cost control** | Added a manually triggered Terraform destroy workflow and removed paid infrastructure after the demo |
 
-**Project scope:** This is a hands-on engineering portfolio deployment using **real AWS infrastructure and production-grade practices**, not a commercial production service. Reliability, disaster recovery and security compliance were not independently certified or load-tested.
+**Project scope:** This is a portfolio deployment on **real AWS infrastructure**, using **production-grade engineering practices**. It is not claimed commercial production experience; high availability, disaster recovery and security compliance were not independently validated.
 
 ## See It Working
 
-### 2-minute technical walkthrough
+### Technical walkthrough (2:29)
 
 [![Watch the AWS EKS Project Walkthrough](https://img.youtube.com/vi/RDmnaTi2auE/hqdefault.jpg)](https://youtu.be/RDmnaTi2auE)
 
@@ -50,7 +54,7 @@ The **EKS control plane is AWS-managed**. Worker nodes and in-cluster services r
 
 ### Deployment Proof — Four Key Screenshots
 
-These are the four outcomes I would show first in a technical interview. Every image below links to preserved project evidence; the full gallery appears in [Implementation Evidence](#implementation-evidence).
+These are the four outcomes I would show first in a technical interview. All four screenshots are preserved in this repository, with the full gallery in [Implementation Evidence](#implementation-evidence).
 
 | 1. Application accessible over HTTPS | 2. Application deployment workflow |
 | --- | --- |
@@ -656,5 +660,4 @@ This project gives me practical examples to discuss in **Junior DevOps, Cloud, I
 ---
 
 **Ismaaeel Ahmed** · DevOps & Cloud Engineering  
-[GitHub](https://github.com/ismaaeelahmed11) · [LinkedIn](https://www.linkedin.com/in/ismaaeelahmed) · [Video walkthrough](https://youtu.be/RDmnaTi2auE)
-[LinkedIn](https://www.linkedin.com/in/ismaaeelahmed) · [GitHub](https://github.com/ismaaeelahmed11) · [Email](mailto:ismaaeelahmed11@gmail.com)
+[GitHub Portfolio](https://github.com/ismaaeelahmed11) · [LinkedIn](https://www.linkedin.com/in/ismaaeelahmed) · [Email](mailto:ismaaeelahmed11@gmail.com) · [Video walkthrough (2:29)](https://youtu.be/RDmnaTi2auE)
