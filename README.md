@@ -647,7 +647,7 @@ This project joined together **AWS infrastructure, Kubernetes operations, CI/CD,
 
 A `Pending` Pod can signal capacity or storage problems; a failed deployment can originate in **AWS IAM/OIDC** instead of Kubernetes YAML; a green pipeline can still have **non-blocking security findings**; and two independent deployment controllers can disagree about the desired application state.
 
-This project gives me practical examples to discuss in ** DevOps, Cloud, Infrastructure, SRE and Platform Engineering** interviews: how I diagnosed a `Pending` Pod, how OIDC trust conditions work, why persistent volumes failed, what Argo CD reconciles and where CI/CD needs stronger release controls.
+This project gives me practical examples to discuss in **DevOps, Cloud, Infrastructure, SRE and Platform Engineering** interviews: how I diagnosed a `Pending` Pod, how OIDC trust conditions work, why persistent volumes failed, what Argo CD reconciles and where CI/CD needs stronger release controls.
 
 **Project context:** Completed during the **CoderCo DevOps Engineering programme (January–October 2026)**, alongside practical portfolio work. This repository documents a time-limited lab deployment using real AWS resources—not claimed commercial work experience.
 
