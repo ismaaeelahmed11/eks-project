@@ -1,23 +1,23 @@
-# AWS EKS — Production-Grade Kubernetes Platform | Terraform, CI/CD, GitOps & Monitoring
+# AWS EKS — Production-Grade Kubernetes Platform | Terraform, GitOps, CI/CD & Observability
 
 **AWS EKS · Terraform · Kubernetes · Helm · GitHub Actions · Argo CD · Prometheus · Grafana · IAM/OIDC · Cloudflare**
 
-> **Completed hands-on engineering project | AWS eu-west-2 (London)**  
-> Deployed and verified on real AWS infrastructure, then intentionally **torn down to avoid recurring costs**. The historical domain `eks.ismaaeelahmed.co.uk` is **not a live demo**. The code, architecture, workflows, technical walkthrough and deployment evidence remain available.
+> **Completed and verified AWS engineering deployment | `eu-west-2` (London)**  
+> Designed, provisioned and validated using real AWS infrastructure. The environment was intentionally removed after the demonstration to control recurring costs; the source code, architecture, workflow results, troubleshooting records and walkthrough remain available. The historical application hostname is not a live service.
 
-**Quick access:** [Video walkthrough](https://youtu.be/RDmnaTi2auE) · [Architecture](#architecture) · [Deployment evidence](#deployment-proof--four-key-screenshots) · [Terraform](#infrastructure-as-code--terraform) · [CI/CD](#cicd--github-actions--aws-oidc) · [GitOps](#gitops--argo-cd) · [Troubleshooting](#troubleshooting--root-cause-analysis) · [Screenshots](#implementation-evidence)
+**Quick access:** [Video walkthrough](https://youtu.be/RDmnaTi2auE) · [Architecture](#architecture) · [Deployment evidence](#deployment-evidence--four-key-screenshots) · [Terraform](#infrastructure-as-code--terraform) · [CI/CD](#cicd--github-actions--aws-oidc) · [GitOps](#gitops--argo-cd) · [Troubleshooting](#troubleshooting--root-cause-analysis) · [Screenshots](#implementation-evidence)
 
-**What this project demonstrates:** I can connect the **AWS infrastructure layer** to the **Kubernetes application layer**, configure GitHub-to-AWS access, deploy and observe workloads, and diagnose problems that cross IAM, networking, scheduling and storage.
+**Engineering scope:** AWS infrastructure provisioning, managed Kubernetes operations, secure application ingress, workload deployment, Git-based reconciliation, observability and troubleshooting across **IAM, networking, scheduling, storage and CI/CD**.
 
 ## Project Overview
 
-I built and troubleshot an end-to-end **Amazon EKS Kubernetes platform**, applying **production-grade engineering practices** across Terraform infrastructure, Kubernetes orchestration, CI/CD, GitOps, IAM, HTTPS and monitoring. Rather than stopping at a successful deployment, I documented what failed, how I diagnosed it and what I would improve.
+I **engineered and demonstrated an end-to-end Kubernetes platform on Amazon EKS**, integrating Terraform-managed AWS networking and compute with container orchestration, application delivery, GitOps, HTTPS and monitoring. The work covered infrastructure design, deployment, validation and incident investigation—not just installation of Kubernetes tools.
 
-Starting with **Terraform-managed AWS networking and EKS**, I deployed the open-source IT-Tools application onto Kubernetes, exposed it via **NGINX Ingress and HTTPS**, integrated **GitHub Actions** and **Argo CD**, and deployed **Prometheus/Grafana** for cluster visibility.
+I deployed the open-source **IT-Tools application with two replicas** behind an NGINX Ingress controller and AWS Network Load Balancer, configured **cert-manager and Cloudflare DNS** for HTTPS access, introduced **GitHub Actions and Argo CD** for delivery and reconciliation, and implemented **Prometheus/Grafana** observability.
 
-The most valuable work was resolving failures across **AWS IAM/OIDC, EKS access configuration, Pod scheduling, EBS CSI storage, resource capacity and deployment automation**. This repository includes the manifests, workflows, architecture, root-cause notes and captured outcomes needed to review that work.
+The most valuable engineering work involved tracing and resolving failures across **IAM/OIDC, EKS access, Pod scheduling, EBS CSI storage, cluster capacity and deployment automation**. The repository preserves the Terraform modules, manifests, Helm values, workflows, architecture, screenshots and root-cause analysis needed to assess those decisions.
 
-### Outcomes at a Glance
+### Verified Engineering Outcomes
 
 | Area | Implemented outcome |
 | --- | --- |
@@ -25,14 +25,14 @@ The most valuable work was resolving failures across **AWS IAM/OIDC, EKS access 
 | **Kubernetes** | EKS v1.31 configuration; managed node group configured for **4 × `t3.small` worker nodes** across **2 Availability Zones** |
 | **Application** | **2 IT-Tools replicas** using a Kubernetes Deployment, ClusterIP Service, health probes and resource limits |
 | **Ingress & TLS** | NGINX Ingress behind an AWS Network Load Balancer, cert-manager/Let's Encrypt, Cloudflare DNS |
-| **CI/CD** | GitHub Actions for Terraform apply, controlled teardown, image publishing, scanning and application deployment |
+| **CI/CD** | GitHub Actions for Terraform validation/apply, manual teardown, image publishing, scan reporting and application deployment; historical successful runs captured |
 | **GitOps** | Argo CD Application with automated sync, prune and self-heal; observed **Synced / Healthy** state |
 | **Observability** | Prometheus, Grafana, Alertmanager and exporters; cluster and namespace metrics captured |
 | **Security** | GitHub-to-AWS **OIDC role assumption**, private worker subnets, TLS, Checkov and Trivy **reporting** |
 | **Troubleshooting** | Investigated and resolved storage, capacity, IAM/OIDC and cluster-access issues |
 | **Cost control** | Added a manually triggered Terraform destroy workflow and removed paid infrastructure after the demo |
 
-**Project scope:** This is a portfolio deployment on **real AWS infrastructure**, using **production-grade engineering practices**. It is not claimed commercial production experience; high availability, disaster recovery and security compliance were not independently validated.
+**Project context:** A time-limited deployment using real AWS services and production-grade engineering practices. Code and recorded results establish what was implemented and observed; untested high availability, disaster recovery and formal compliance controls are not represented as delivered capabilities.
 
 ## See It Working
 
@@ -52,7 +52,7 @@ The most valuable work was resolving failures across **AWS IAM/OIDC, EKS access 
 
 The **EKS control plane is AWS-managed**. Worker nodes and in-cluster services run on EC2 nodes in **private subnets**; public subnets support internet-facing load-balancing infrastructure. TLS termination and routing are handled through the Kubernetes ingress layer.
 
-### Deployment Proof — Four Key Screenshots
+### Deployment Evidence — Four Key Screenshots
 
 These are the four outcomes I would show first in a technical interview. All four screenshots are preserved in this repository, with the full gallery in [Implementation Evidence](#implementation-evidence).
 
@@ -154,7 +154,16 @@ terraform/
 
 The VPC module configures DNS-enabled networking, public subnets for internet-facing resources, private subnets for worker nodes, route tables, an internet gateway and outbound NAT connectivity.
 
-**Why private nodes?** The application can be exposed via a load balancer without giving each worker node a directly routable public IP.
+**Why private nodes?** Kubernetes worker nodes do not need directly routable public IPs to serve an internet-facing application through a load balancer. This separates the **public ingress plane** from the **private workload plane**.
+
+### Load balancing and ingress responsibilities
+
+- **Cloudflare/ExternalDNS:** Maintains the hostname that directs traffic to the AWS-facing endpoint.
+- **AWS Network Load Balancer:** Accepts external connections for the NGINX ingress controller.
+- **NGINX Ingress:** Terminates HTTPS with the cert-manager-managed certificate and applies Kubernetes host/path routing.
+- **Kubernetes Service:** Routes port-80 traffic to the healthy IT-Tools pods.
+
+This separates external load balancing, TLS/HTTP routing and service discovery. The committed Helm values configure **one NGINX controller replica**, so this project is not claiming ingress-controller high availability.
 
 ### Terraform remote state
 
@@ -218,9 +227,15 @@ Three workflows are stored under [`.github/workflows/`](.github/workflows/):
 | [`app-deploy.yml`](.github/workflows/app-deploy.yml) | Push to `main` affecting `k8s/**`, `Dockerfile` or its workflow file; also manual | Checkov report, ECR image publication, Trivy report, Kubernetes apply and rollout status |
 | [`terraform-destroy.yml`](.github/workflows/terraform-destroy.yml) | Manual `workflow_dispatch` with a required `destroy` confirmation | Terraform destroy of tracked infrastructure |
 
-### Why OIDC matters
+### IAM, OIDC and Kubernetes access boundaries
 
-The workflows request short-lived AWS credentials by assuming an IAM role through **GitHub Actions OIDC**. This avoids storing permanent AWS access keys in GitHub repository secrets. The role and repository-claim trust conditions are represented in Terraform and supporting screenshots.
+The project uses three distinct identity paths:
+
+1. **GitHub Actions → AWS:** Federated role assumption through GitHub OIDC, avoiding stored long-lived AWS access keys. The OIDC audience/subject trust conditions are defined in [Terraform](terraform/modules/oidc/main.tf).
+2. **AWS identity → EKS API:** Explicit [EKS access entries](terraform/modules/eks/main.tf) grant cluster permissions to the configured IAM principals. Cluster-administrator access was used in the lab and would require narrower role-based authorisation for an operated service.
+3. **EBS CSI controller → AWS:** An [IRSA role](terraform/modules/irsa/main.tf) defines EBS access for the CSI service account. Its association with the EKS add-on must be verified/configured when recreating the environment; the role resource alone does not attach it to the add-on.
+
+**Current source-code state:** The AWS-managed `AdministratorAccess` attachment was removed from the GitHub OIDC role. The role currently has **no replacement IAM permissions attached** in this module; new AWS provisioning and application workflow runs therefore require an appropriate scoped role/policy configuration and working resources. The screenshots document historical successful runs, not a redeployment after this security change.
 
 ### What the application pipeline actually does
 
@@ -258,9 +273,9 @@ kubectl rollout status checks the deployment
 
 That means the scans are integrated and produce useful findings, **but security findings do not fail this pipeline**. A successful workflow is evidence of successful automation—not a clean security assessment.
 
-### Current automation trade-offs
+### Release design and deployment ownership
 
-The Terraform workflow uses `terraform apply -auto-approve` on pushes to `main`. For a team-operated environment I would add pull-request plans, approvals and protected environments, with apply separated from code review.
+The committed Terraform workflow still triggers on changes to `main` and contains `terraform apply -auto-approve`. In an operated team environment, I would separate pull-request validation and planning from reviewed deployment, using protected environments and scoped IAM roles. This is a **release-control improvement**, not a feature claimed as complete.
 
 The app workflow also applies manifests directly with `kubectl`, while Argo CD separately reconciles the same `k8s/` directory. Additionally, the pipeline substitutes the commit-specific image tag **in the runner's local copy**, without writing that tag back to the Git source Argo CD watches. This can create **GitOps drift** or allow Argo CD to revert a direct deployment.
 
@@ -335,7 +350,7 @@ Persistent volume claims remained unresolved until the AWS storage integration a
 
 ### 3. OIDC — AWS authentication requires matching trust conditions
 
-I investigated failures in the GitHub-to-AWS role assumption, checked the trust policy and adjusted subject-claim conditions. **Lesson:** federated access needs deliberate audience/subject conditions and least-privilege permissions, not merely a configured role ARN.
+I investigated failures in GitHub-to-AWS role assumption, inspected the role trust policy and adjusted subject-claim conditions. **Lesson:** federated authentication requires the token audience/subject to match the trust policy, while the assumed role requires **separate IAM permissions**. The current source code retains the trust role but no longer grants administrator access.
 
 ### 4. EKS access — one clear source of authorisation
 
@@ -492,7 +507,7 @@ The [manual destroy workflow](.github/workflows/terraform-destroy.yml) requires 
 
 ---
 
-## Operational Trade-offs & Next Improvements
+## Engineering Trade-offs & Operational Roadmap
 
 | Area | Present in this project | Next engineering improvement |
 | --- | --- | --- |
@@ -500,13 +515,13 @@ The [manual destroy workflow](.github/workflows/terraform-destroy.yml) requires 
 | **App delivery / GitOps** | Direct Actions deployment **and** Argo CD reconciliation | Git-driven release updates with one deployment owner and immutable image digests |
 | **Security scanning** | Checkov and Trivy report findings | Remediate findings and enforce risk-based failing thresholds |
 | **Image provenance** | Retags Docker Hub `latest` using commit SHA in ECR | Pin and verify an upstream image digest; add provenance/SBOM as appropriate |
-| **IAM** | OIDC roles and explicit EKS access entries | Scope administrative access and permissions more narrowly |
+| **IAM** | OIDC trust role, EBS CSI IRSA role definition, explicit EKS access entries; old administrator attachment removed from GitHub role | Attach scoped workflow policies, bind EBS CSI add-on role and reduce EKS administrator grants |
 | **Availability** | 2 AZs, 2 app replicas, 4 configured worker nodes | Exercise node failures, PodDisruptionBudgets, backups and recovery |
 | **Cost / networking** | Single NAT gateway, fixed small workers, teardown workflow | Compare NAT/high-availability trade-offs, autoscaling and cost observability |
 | **Observability** | Prometheus/Grafana dashboards and Alertmanager installed | Test meaningful alerts, incident runbooks, SLOs and retention |
 | **Reproducibility** | Terraform/manifests/Helm values preserved | Pin/upgrade supported EKS and chart versions; remove account-specific identifiers |
 
-**These are future improvements**, not completed features. Naming limitations is part of making a technical project reviewable and trustworthy.
+**Future engineering priorities:** reviewed deployments, one GitOps release owner, scoped IAM policies, pinned image provenance, tested availability and alerting. The existing repository demonstrates the implemented platform and historical deployment evidence; the table separates that result from future work.
 
 ---
 
@@ -641,13 +656,13 @@ I tracked provisioning, Kubernetes configuration, automation, monitoring, troubl
 
 **[View the project board](https://github.com/users/ismaaeelahmed11/projects/1)**
 
-## Engineering Outcomes & Interview Discussion
+## Engineering Outcomes & Technical Discussion
 
-This project joined together **AWS infrastructure, Kubernetes operations, CI/CD, GitOps and observability**. More importantly, it forced me to debug interactions between them.
+This project demonstrates how I connected **AWS infrastructure, Kubernetes workloads, GitHub Actions, GitOps and observability** into a working platform with verifiable outcomes. The engineering work also exposed failure modes that cut across service boundaries.
 
-A `Pending` Pod can signal capacity or storage problems; a failed deployment can originate in **AWS IAM/OIDC** instead of Kubernetes YAML; a green pipeline can still have **non-blocking security findings**; and two independent deployment controllers can disagree about the desired application state.
+A `Pending` Pod can indicate scheduling capacity or unresolved storage; failed CI/CD may originate in **AWS IAM/OIDC** rather than YAML; a green pipeline can still contain **non-blocking security findings**; and direct CI deployment can conflict with Git-driven reconciliation.
 
-This project gives me practical examples to discuss in **DevOps, Cloud, Infrastructure, SRE and Platform Engineering** interviews: how I diagnosed a `Pending` Pod, how OIDC trust conditions work, why persistent volumes failed, what Argo CD reconciles and where CI/CD needs stronger release controls.
+The repository supports technical discussions about **capacity planning, identity federation, Kubernetes networking, persistent storage, GitOps release ownership, platform diagnostics and operational controls**. Those discussions are grounded in actual configuration, screenshots, and incidents—not unsupported claims of commercial production operation.
 
 **Project context:** Completed during the **CoderCo DevOps Engineering programme (January–October 2026)**, alongside practical portfolio work. This repository documents a time-limited lab deployment using real AWS resources—not claimed commercial work experience.
 
@@ -659,5 +674,5 @@ This project gives me practical examples to discuss in **DevOps, Cloud, Infrastr
 
 ---
 
-**Ismaaeel Ahmed** · DevOps & Cloud Engineering  
+**Ismaaeel Ahmed · DevOps Engineer**  
 [GitHub Portfolio](https://github.com/ismaaeelahmed11) · [LinkedIn](https://www.linkedin.com/in/ismaaeelahmed) · [Email](mailto:ismaaeelahmed11@gmail.com) · [Video walkthrough (2:29)](https://youtu.be/RDmnaTi2auE)
